@@ -1,0 +1,28 @@
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Skip sentence-transformers/torch here: the test suite never loads
+      # the embedding model (it's imported lazily), it only exercises the
+      # pure grouping/labeling/report logic with numpy arrays. Installing
+      # the full runtime deps would work too, just much slower.
+      - name: Install dependencies
+        run: |
+          pip install numpy rich pytest
+          pip install -e . --no-deps
+
+      - name: Run tests
+        run: pytest -v
